@@ -1,9 +1,11 @@
 const express = require('express');
 const mongoose = require("mongoose");
 const beerRouter = require("./routers/beerRouter");
+const cors = require('cors')
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use("/beer", beerRouter);
 

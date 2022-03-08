@@ -9,6 +9,8 @@ router.get("/getOneBeer/:beerId", beerController.getOneBeer);
 router.delete("/deleteBeer", beerController.deleteBeer);
 router.put("/editBeer/:beerId", beerController.editBeer);
 
+router.get("/getBeers/filter", beerController.getBeersFilter)
+
 module.exports = router;
 
 
