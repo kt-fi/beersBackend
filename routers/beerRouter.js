@@ -6,7 +6,7 @@ const router = express.Router();
 router.post("/createBeer", beerController.createBeer);
 router.get("/getAllBeers", beerController.getAllBeers);
 router.get("/getOneBeer/:beerId", beerController.getOneBeer);
-router.delete("/deleteBeer", beerController.deleteBeer);
+router.delete("/deleteBeer/:id", beerController.deleteBeer);
 router.put("/editBeer/:beerId", beerController.editBeer);
 
 router.get("/getBeers/filter", beerController.getBeersFilter)

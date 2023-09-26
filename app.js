@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/beer", beerRouter);
 
+mongoose.set('strictQuery', true);
 mongoose.connect("mongodb://localhost:27017/beerApp");
 
 

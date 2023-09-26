@@ -4,28 +4,32 @@ const HttpError = require("../httpError/httpError");
 const Beer = require("../schemas/beerSchema");
 
 
+const { v4: uuidv4 } = require('uuid');
+
 //CREATE NEW BEER FOR DB
 const createBeer = async (req, res, next) => {
 
-    const {beerName, type, origin, taste, alcohol, foodSuggestion, price, beerImage} = req.body;
+    const {name, category, style, country, alcohol, imageUrl, color, description, notes} = req.body;
 
     try{
        let beer = await new Beer({
-        beerName: beerName,
-        type: type,
-        origin: origin,
-        taste: taste,
+        beerId: uuidv4(),
+        name: name,
+        category: category,
+        style: style,
+        country: country,
         alcohol: alcohol,
-        foodSuggestion: foodSuggestion,
-        price: price,
-        beerImage: beerImage
+        imageUrl: imageUrl,
+        color: color,
+        description: description,
+        notes: notes
     });
 
     await beer.save();
     res.json(beer);
 
     }catch(err){
-    let error = new HttpError("Error Message Here", 404);
+    let error = new HttpError(err, 404);
     return next(error)
     }
  
@@ -40,7 +44,7 @@ const getAllBeers = async (req, res, next) => {
     try{
         beers = await Beer.find();
     }catch(err){
-        let error = new HttpError("Error Message Here", 404);
+        let error = new HttpError("Unable to Find Beers", 404);
         return next(error)
     } 
     res.json(beers.map(beer=> beer.toObject({getters:true})))
@@ -72,13 +76,13 @@ const getOneBeer = async (req, res, next) => {
 // DELETE BEER
 
 const deleteBeer = async (req, res, next) => {
-
-    const beerId = req.body.beerId;
-
+    
+    const beerId = req.params.id;
+    let beer;
     try{
 
-        await Beer.findByIdAndRemove(beerId);
-        res.send(beerId);
+       beer = await  Beer.findOneAndRemove({beerId});
+        res.json(beer);
 
     }catch(err){
         let error = new HttpError("Error Message Here", 404);
@@ -93,50 +97,57 @@ const editBeer = async (req, res, next) => {
 
     const beerId = req.params.beerId;
 
-    const {beerName, type, origin, taste, alcohol, foodSuggestion, price, beerImage} = req.body;
+    const {name, category, style, country, alcohol, imageUrl, color, description, notes} = req.body;
 
     let beerToUpdate;
 
     try{
 
-        beerToUpdate = await Beer.findById(beerId);
-        await beerToUpdate.save();
+        beerToUpdate = await Beer.findOne({beerId});
+     
 
     }catch(err){
-        let error = new HttpError("Error Message Here", 404);
+        let error = new HttpError(err, 404);
         return next(error)
     }
 
-    if(beerName)beerToUpdate.beerName = beerName;  
-    if(type)beerToUpdate.type = type;
-    if(origin)beerToUpdate.origin = origin;
-    if(taste)beerToUpdate.taste = taste;
+    if(name)beerToUpdate.name = name;  
+    if(category)beerToUpdate.category = category;
+    if(style)beerToUpdate.style = style;
+    if(country)beerToUpdate.country = country;
     if(alcohol)beerToUpdate.alcohol = alcohol;
-    if(foodSuggestion)beerToUpdate.foodSuggestion = foodSuggestion;
-    if(price)beerToUpdate.price = price;
-    if(beerImage)beerToUpdate.beerImage = beerImage;
+    if(imageUrl)beerToUpdate.imageUrl = imageUrl;
+    if(color)beerToUpdate.color = color;
+    if(description)beerToUpdate.description = description;
+    if(notes)beerToUpdate.notes = notes;
 
     try{
         await beerToUpdate.save();
     }catch(err){
-        res.send("ERROR 2 CAUGHT")
+        // res.send("Could Not Save Neww Beer")
 
     }
-    res.json(beerToUpdate)
+   await res.json(beerToUpdate)
 }
 
+
+// FILTER BEERS???
  const getBeersFilter = async (req, res, next) => {
     let filters = req.query;
     
     let foundBeer;
 
-  
     console.log(filters)
 
     try{
         foundBeer = await Beer.find({...filters})
-
-        res.json(foundBeer)
+        if(foundBeer){
+         res.json(foundBeer)   
+        }else{
+            let error = new HttpError("No Beer Found", 404)
+            return next(error)
+        }
+        
     }catch(err){
         res.send(err)
     }
